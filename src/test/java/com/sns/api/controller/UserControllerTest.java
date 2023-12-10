@@ -1,6 +1,7 @@
 package com.sns.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sns.api.exception.ErrorCode;
 import com.sns.api.exception.SnsApplicationException;
 import com.sns.api.model.User;
 import com.sns.api.controller.request.UserLoginRequest;
@@ -58,7 +59,8 @@ class UserControllerTest {
                 .password("1234")
                 .build();
 
-        when(userService.signup(hwang)).thenThrow(new SnsApplicationException());
+        when(userService.signup(hwang)).thenThrow(new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, String.format("userName is %s", hwang.getUserName())));
+
 
         mockMvc.perform(post("/api/users/signup")
                         .contentType(APPLICATION_JSON)
