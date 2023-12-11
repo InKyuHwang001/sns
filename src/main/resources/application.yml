@@ -1,11 +1,12 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/shop
-    username: admin_wj
-    password: admin_wj
+    url: jdbc:postgresql://ec2-44-212-250-48.compute-1.amazonaws.com/dauhvof0j0c69s
+    username: brcsyocwccspld
+    password: 868845f0a7409d33e812f6649c82d28fe2141c05b41189e9c4fbab937568facf
     hikari:
       maximum-pool-size: 6
+
 
   jpa:
     database: postgresql

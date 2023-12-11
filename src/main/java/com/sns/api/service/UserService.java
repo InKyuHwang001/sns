@@ -24,7 +24,7 @@ public class UserService {
         });
 
         UserEntity save = userEntityRepository.save(UserEntity.of(userSignupRequest.getUserName(), userSignupRequest.getPassword()));
-        return new User();
+        return new User().fromEntity(save);
     }
 
     //TODO: develop

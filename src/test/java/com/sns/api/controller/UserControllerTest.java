@@ -35,8 +35,8 @@ class UserControllerTest {
 
 
     @Test
-    @DisplayName("[post /api/users/signup] 성공")
-    public void signup1() throws Exception {
+    @DisplayName("[post /api/users/join] 성공")
+    public void join1() throws Exception {
         var hwang = UserSignupRequest.builder()
                 .userName("hwang")
                 .password("1234")
@@ -52,8 +52,8 @@ class UserControllerTest {
 
     }
     @Test
-    @DisplayName("[post /api/users/signup] 실패 >> 이미 존재하는 userName으로 하는 경우 에러반환")
-    public void signup2() throws Exception{
+    @DisplayName("[post /api/users/join] 실패 >> 이미 존재하는 userName으로 하는 경우 에러반환")
+    public void join2() throws Exception{
         var hwang = UserSignupRequest.builder()
                 .userName("hwang")
                 .password("1234")
@@ -62,7 +62,7 @@ class UserControllerTest {
         when(userService.signup(hwang)).thenThrow(new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, String.format("userName is %s", hwang.getUserName())));
 
 
-        mockMvc.perform(post("/api/users/signup")
+        mockMvc.perform(post("/api/users/join")
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(hwang))
                 ).andDo(print())
