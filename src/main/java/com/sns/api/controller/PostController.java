@@ -1,14 +1,13 @@
 package com.sns.api.controller;
 
 import com.sns.api.controller.request.PostCreateRequest;
+import com.sns.api.controller.response.PostResponse;
 import com.sns.api.controller.response.Response;
+import com.sns.api.model.Post;
 import com.sns.api.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/posts")
@@ -18,10 +17,14 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping()
-    public Response<Void> create(@RequestBody PostCreateRequest request, Authentication authentication){
+    public Response<Void> create(@RequestBody PostCreateRequest request, Authentication authentication) {
         postService.create(request.getTitle(), request.getBody(), authentication.getName());
-
-        return  Response.success();
+        return Response.success();
     }
 
+    @PutMapping("/{postId}")
+    public Response<PostResponse> modify(@PathVariable Integer postId, @RequestBody PostCreateRequest request, Authentication authentication) {
+        Post modify = postService.modify(request.getTitle(), request.getBody(), authentication.getName(), postId);
+        return Response.success(PostResponse.fromPost(modify));
+    }
 }

@@ -2,6 +2,7 @@ package com.sns.api.service;
 
 import com.sns.api.exception.ErrorCode;
 import com.sns.api.exception.SnsApplicationException;
+import com.sns.api.model.Post;
 import com.sns.api.model.entity.PostEntity;
 import com.sns.api.model.entity.UserEntity;
 import com.sns.api.repository.PostEntityRepository;
@@ -20,11 +21,27 @@ public class PostService {
     @Transactional
     public void create(String title, String body, String userName) {
         UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(() ->
-                new SnsApplicationException(
-                        ErrorCode.USER_NOT_FOUND,
-                        String.format("%s not founded", userName)));
+                new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
 
-        postEntityRepository.save(PostEntity.of(title,body,userEntity));
+        postEntityRepository.save(PostEntity.of(title, body, userEntity));
 
+    }
+
+    @Transactional
+    public Post modify(String title, String body, String userName, Integer postId) {
+        UserEntity userEntity = userEntityRepository.findByUserName(userName).orElseThrow(() ->
+                new SnsApplicationException(ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
+
+        PostEntity postEntity = postEntityRepository.findById(postId).orElseThrow(() ->
+                new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("%s not founded", postId)));
+
+        if(postEntity.getUser() != userEntity){
+            throw new SnsApplicationException(ErrorCode.INVALID_PERMISSION, String.format("user %s has no permission with post %d", userName, postId));
+        }
+
+        postEntity.setTitle(title);
+        postEntity.setBody(body);
+
+        return Post.fromEntity(postEntityRepository.saveAndFlush(postEntity));
     }
 }
