@@ -2,8 +2,10 @@ package com.sns.api.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor //TODO: 삭제예ㅖ정
 public class SnsApplicationException extends RuntimeException{
 
     private ErrorCode errorCode;
@@ -13,6 +15,13 @@ public class SnsApplicationException extends RuntimeException{
         this.message = message;
         this.errorCode = errorCode;
     }
+
+    public SnsApplicationException(ErrorCode errorCode) {
+        this.message = null;
+        this.errorCode = errorCode;
+    }
+
+
 
     @Override
     public String getMessage() {

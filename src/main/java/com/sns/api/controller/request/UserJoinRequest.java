@@ -4,14 +4,14 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class UserSignupRequest {
+public class UserJoinRequest {
 
     private String userName;
 
     private String password;
 
     @Builder
-    public UserSignupRequest(String userName, String password) {
+    public UserJoinRequest(String userName, String password) {
         this.userName = userName;
         this.password = password;
     }

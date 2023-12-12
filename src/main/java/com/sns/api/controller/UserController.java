@@ -1,11 +1,11 @@
 package com.sns.api.controller;
 
 
+import com.sns.api.controller.request.UserJoinRequest;
 import com.sns.api.controller.request.UserLoginRequest;
-import com.sns.api.controller.request.UserSignupRequest;
 import com.sns.api.controller.response.Response;
-import com.sns.api.controller.response.UserSignUpResponse;
-import com.sns.api.model.User;
+import com.sns.api.controller.response.UserLoginResponse;
+import com.sns.api.controller.response.UserJoinResponse;
 import com.sns.api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,14 +21,14 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/join")
-    public Response<UserSignUpResponse> join(@RequestBody UserSignupRequest userSignupRequest) {
-        User signup = userService.signup(userSignupRequest);
-        return Response.success(UserSignUpResponse.fromUser(signup));
+    public Response<UserJoinResponse> join(@RequestBody UserJoinRequest request) {
+        return Response.success(UserJoinResponse.fromUser(userService.join(request.getUserName(), request.getPassword())));
     }
 
-    @PostMapping
-    public void login(UserLoginRequest userLoginRequest) {
-        userService.login(userLoginRequest);
+    @PostMapping("/login")
+    public Response<UserLoginResponse> login(@RequestBody UserLoginRequest request) {
+        String token = userService.login(request.getUserName(), request.getPassword());
+        return Response.success(new UserLoginResponse(token));
     }
 
 

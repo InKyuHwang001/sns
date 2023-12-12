@@ -1,43 +1,54 @@
 package com.sns.api.service;
 
-import com.sns.api.controller.request.UserLoginRequest;
-import com.sns.api.controller.request.UserSignupRequest;
 import com.sns.api.exception.ErrorCode;
 import com.sns.api.exception.SnsApplicationException;
 import com.sns.api.model.User;
 import com.sns.api.model.entity.UserEntity;
 import com.sns.api.repository.UserEntityRepository;
+import com.sns.api.util.JwtTokenUtils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserEntityRepository userEntityRepository;
-    //TODO: develop
-    public User signup(UserSignupRequest userSignupRequest){
-        userEntityRepository.findByUserName(userSignupRequest.getUserName()).ifPresent(it -> {
-            throw new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, String.format("userName is %s", userSignupRequest.getUserName()));
+    private final BCryptPasswordEncoder encoder;
+
+    @Value("${jwt.secret-key}")
+    private String secretKey;
+
+    @Value("${jwt.token.expired-time-ms}")
+    private Long expiredTimeMs;
+
+
+    @Transactional
+    public User join(String userName, String password) {
+        // check the userId not exist
+        userEntityRepository.findByUserName(userName).ifPresent(it -> {
+            throw new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, String.format("userName is %s", userName));
         });
 
-        UserEntity save = userEntityRepository.save(UserEntity.of(userSignupRequest.getUserName(), userSignupRequest.getPassword()));
-        return new User().fromEntity(save);
+        UserEntity savedUser = userEntityRepository.save(UserEntity.of(userName, encoder.encode(password)));
+        return User.fromEntity(savedUser);
     }
 
-    //TODO: develop
-    public String login(UserLoginRequest userLoginRequest){
-//        UserEntity userEntity = userEntityRepository.findByUserName(userLoginRequest.getUserName()).orElseThrow(new SnsApplicationException(ErrorCode.DATABASE_ERROR," "));
-//
-//        if (!userEntity.getPassword().equals(userLoginRequest.getPassword())){
-//            throw new SnsApplicationException();
-//        }
+    public String login(String userName, String password) {
+        UserEntity userEntity = userEntityRepository.findByUserName(userName)
+                .orElseThrow(() -> new SnsApplicationException(
+                        ErrorCode.USER_NOT_FOUND, String.format("%s not founded", userName)));
 
-        //TODO: 토큰 생성
+        if (!encoder.matches(password, userEntity.getPassword())){
+            throw new SnsApplicationException(ErrorCode.INVALID_PASSWORD);
+        }
 
-        return "";
+
+        return JwtTokenUtils.generateToken(userName, secretKey, expiredTimeMs);
     }
 }
 

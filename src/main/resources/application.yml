@@ -20,4 +20,9 @@ spring:
     init:
       platform: postgres
 
+jwt:
+  secret-key: ghkddlsrb_cjswo_gjgnswp_qkqh0ajdcjddl
+  # 30 days
+  token.expired-time-ms: 2592000000
+
 
