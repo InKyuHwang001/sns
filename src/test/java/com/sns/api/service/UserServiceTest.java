@@ -37,7 +37,7 @@ class UserServiceTest {
         String userName = "userName";
         String password  = "password";
 
-        UserEntity fixture = UserEntityFixture.get(userName, password);
+        UserEntity fixture = UserEntityFixture.get(userName, password, 1);
 
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(fixture));
         when(encoder.matches(password, fixture.getPassword())).thenReturn(true);
@@ -62,7 +62,7 @@ class UserServiceTest {
     void 로그인시_패스워드가_다르면_에러를_내뱉는다() {
         TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
-        when(userEntityRepository.findByUserName(fixture.getUserName())).thenReturn(Optional.of(UserEntityFixture.get(fixture.getUserName(), "password1")));
+        when(userEntityRepository.findByUserName(fixture.getUserName())).thenReturn(Optional.of(UserEntityFixture.get(fixture.getUserName(), "password1", 1)));
         when(encoder.matches(fixture.getPassword(), "password1")).thenReturn(false);
 
         SnsApplicationException exception = Assertions.assertThrows(SnsApplicationException.class
@@ -79,7 +79,7 @@ class UserServiceTest {
 
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.empty());
         when(encoder.encode(password)).thenReturn("password_encrypt");
-        when(userEntityRepository.save(any())).thenReturn(UserEntityFixture.get(userName, "password_encrypt"));
+        when(userEntityRepository.save(any())).thenReturn(UserEntityFixture.get(userName, "password_encrypt", 1));
 
         assertDoesNotThrow(() -> userService.join(userName, password));
     }
@@ -90,7 +90,7 @@ class UserServiceTest {
         TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
         when(userEntityRepository.findByUserName(fixture.getUserName()))
-                .thenReturn(Optional.of(UserEntityFixture.get(fixture.getUserName(), fixture.getPassword())));
+                .thenReturn(Optional.of(UserEntityFixture.get(fixture.getUserName(), fixture.getPassword(), 1)));
 
         SnsApplicationException exception = Assertions.assertThrows(SnsApplicationException.class,
                 () -> userService.join(fixture.getUserName(), fixture.getPassword()));
