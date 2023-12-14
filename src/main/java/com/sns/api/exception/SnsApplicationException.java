@@ -1,11 +1,8 @@
 package com.sns.api.exception;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor //TODO: 삭제예ㅖ정
 public class SnsApplicationException extends RuntimeException{
 
     private ErrorCode errorCode;
