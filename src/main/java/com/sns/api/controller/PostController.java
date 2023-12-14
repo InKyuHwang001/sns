@@ -16,7 +16,7 @@ public class PostController {
 
     private final PostService postService;
 
-    @PostMapping()
+    @PostMapping
     public Response<Void> create(@RequestBody PostCreateRequest request, Authentication authentication) {
         postService.create(request.getTitle(), request.getBody(), authentication.getName());
         return Response.success();
@@ -27,4 +27,12 @@ public class PostController {
         Post modify = postService.modify(request.getTitle(), request.getBody(), authentication.getName(), postId);
         return Response.success(PostResponse.fromPost(modify));
     }
+
+    @DeleteMapping("/{postId}")
+    public Response<Void> delete(@PathVariable Integer postId, Authentication authentication){
+        postService.delete(authentication.getName(), postId);
+
+        return Response.success();
+    }
+
 }
