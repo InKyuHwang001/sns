@@ -3,23 +3,20 @@ package com.sns.api.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sns.api.controller.request.PostCreateRequest;
 import com.sns.api.controller.request.PostModifyRequest;
-import com.sns.api.exception.ErrorCode;
 import com.sns.api.exception.SnsApplicationException;
-import com.sns.api.fixture.PostEntityFixture;
-import com.sns.api.model.Post;
 import com.sns.api.service.PostService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static com.sns.api.exception.ErrorCode.*;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -112,8 +109,6 @@ class PostControllerTest {
     @Test
     @WithMockUser
     void 포스트삭제() throws Exception {
-        String title = "title";
-        String body = "body";
 
         mockMvc.perform(delete("/api/v1/posts/1")
                         .contentType(APPLICATION_JSON)                )
@@ -152,5 +147,31 @@ class PostControllerTest {
                         .contentType(APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNotFound());
+    }
+
+
+    @Test
+    @WithAnonymousUser
+    void 피드목록요청시_로그인하지_않은경우() throws Exception {
+        // mocking
+        when(postService.list(any())).thenReturn(Page.empty());
+
+        mockMvc.perform(get("/api/v1/posts")
+                        .contentType(APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+
+
+    @Test
+    @WithAnonymousUser
+    void 내피드목록요청시_로그인하지_않은경우() throws Exception {
+        // mocking
+        when(postService.my(any(), any())).thenReturn(Page.empty());
+        mockMvc.perform(get("/api/v1/posts/my")
+                        .contentType(APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isUnauthorized());
     }
 }

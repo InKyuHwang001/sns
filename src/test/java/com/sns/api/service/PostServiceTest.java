@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
@@ -56,7 +58,7 @@ class PostServiceTest {
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.empty());
         when(postEntityRepository.save(any())).thenReturn(mock(PostEntity.class));
 
-        var exception = assertThrows(SnsApplicationException.class, () -> postService.create(tittle,body,userName));
+        var exception = assertThrows(SnsApplicationException.class, () -> postService.create(tittle, body, userName));
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
     }
 
@@ -85,13 +87,13 @@ class PostServiceTest {
         String userName = "userName";
         Integer postId = 1;
 
-        PostEntity postEntity = PostEntityFixture.get(userName, postId,1);
+        PostEntity postEntity = PostEntityFixture.get(userName, postId, 1);
         UserEntity userEntity = postEntity.getUser();
 
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(userEntity));
         when(postEntityRepository.findById(postId)).thenReturn(Optional.empty());
 
-        var exception = assertThrows(SnsApplicationException.class, () -> postService.modify(tittle,body,userName,postId));
+        var exception = assertThrows(SnsApplicationException.class, () -> postService.modify(tittle, body, userName, postId));
         assertEquals(ErrorCode.POST_NOT_FOUND, exception.getErrorCode());
     }
 
@@ -102,14 +104,14 @@ class PostServiceTest {
         String userName = "userName";
         Integer postId = 1;
 
-        PostEntity postEntity = PostEntityFixture.get(userName, postId,1);
+        PostEntity postEntity = PostEntityFixture.get(userName, postId, 1);
         UserEntity writer = UserEntityFixture.get("userName1", "aaaaa", 2);
 
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(writer));
         when(postEntityRepository.findById(postId)).thenReturn(Optional.of(postEntity));
 
 
-        var exception = assertThrows(SnsApplicationException.class, () -> postService.modify(tittle,body,userName,postId));
+        var exception = assertThrows(SnsApplicationException.class, () -> postService.modify(tittle, body, userName, postId));
         assertEquals(ErrorCode.INVALID_PERMISSION, exception.getErrorCode());
     }
 
@@ -134,7 +136,7 @@ class PostServiceTest {
         String userName = "userName";
         Integer postId = 1;
 
-        PostEntity postEntity = PostEntityFixture.get(userName, postId,1);
+        PostEntity postEntity = PostEntityFixture.get(userName, postId, 1);
         UserEntity userEntity = postEntity.getUser();
 
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(userEntity));
@@ -149,7 +151,7 @@ class PostServiceTest {
         String userName = "userName";
         Integer postId = 1;
 
-        PostEntity postEntity = PostEntityFixture.get(userName, postId,1);
+        PostEntity postEntity = PostEntityFixture.get(userName, postId, 1);
         UserEntity writer = UserEntityFixture.get("userName1", "aaaaa", 2);
 
         when(userEntityRepository.findByUserName(userName)).thenReturn(Optional.of(writer));
@@ -159,4 +161,25 @@ class PostServiceTest {
         var exception = assertThrows(SnsApplicationException.class, () -> postService.delete(userName, postId));
         assertEquals(ErrorCode.INVALID_PERMISSION, exception.getErrorCode());
     }
+
+    @Test
+    void 피드목록_요청이_정상동작한다() {
+
+        Pageable pageable = mock(Pageable.class);
+        when(postEntityRepository.findAll(pageable)).thenReturn(Page.empty());
+
+        assertDoesNotThrow(() -> postService.list(pageable));
+    }
+
+    @Test
+    void 내피드목록_요청이_정상동작한다() {
+        Pageable pageable = mock(Pageable.class);
+        UserEntity user = mock(UserEntity.class);
+
+        when(userEntityRepository.findByUserName(any())).thenReturn(Optional.of(user));
+        when(postEntityRepository.findAllByUser(user, pageable)).thenReturn(Page.empty());
+
+        assertDoesNotThrow(() -> postService.my("", pageable));
+    }
+
 }

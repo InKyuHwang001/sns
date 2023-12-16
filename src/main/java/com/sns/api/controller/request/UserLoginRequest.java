@@ -6,13 +6,13 @@ import lombok.Getter;
 @Getter
 public class UserLoginRequest {
 
-    private String userName;
+    private String name;
 
     private String password;
 
     @Builder
-    public UserLoginRequest(String userName, String password) {
-        this.userName = userName;
+    public UserLoginRequest(String name, String password) {
+        this.name = name;
         this.password = password;
     }
 }
