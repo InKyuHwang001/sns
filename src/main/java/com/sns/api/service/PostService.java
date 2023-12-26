@@ -1,16 +1,11 @@
 package com.sns.api.service;
 
 import com.sns.api.exception.SnsApplicationException;
+import com.sns.api.model.AlarmArgs;
 import com.sns.api.model.Comment;
 import com.sns.api.model.Post;
-import com.sns.api.model.entity.CommentEntity;
-import com.sns.api.model.entity.LikeEntity;
-import com.sns.api.model.entity.PostEntity;
-import com.sns.api.model.entity.UserEntity;
-import com.sns.api.repository.CommentEntityRepository;
-import com.sns.api.repository.LikeEntityRepository;
-import com.sns.api.repository.PostEntityRepository;
-import com.sns.api.repository.UserEntityRepository;
+import com.sns.api.model.entity.*;
+import com.sns.api.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import static com.sns.api.exception.ErrorCode.*;
 import static com.sns.api.exception.ErrorCode.ALREADY_LIKED_POST;
+import static com.sns.api.model.AlarmType.*;
 
 
 @Service
@@ -30,6 +26,7 @@ public class PostService {
     private final UserEntityRepository userEntityRepository;
     private final LikeEntityRepository likeEntityRepository;
     private final CommentEntityRepository commentEntityRepository;
+    private final AlarmEntityRepository alarmEntityRepository;
 
 
     @Transactional
@@ -64,6 +61,8 @@ public class PostService {
             throw new SnsApplicationException(INVALID_PERMISSION, String.format("user %s has no permission with post %d", userName, postId));
         }
 
+        likeEntityRepository.deleteAllByPost(postEntity);
+        commentEntityRepository.deleteAllByPost(postEntity);
         postEntityRepository.delete(postEntity);
     }
 
@@ -87,9 +86,13 @@ public class PostService {
         });
 
         likeEntityRepository.save(LikeEntity.of(postEntity, userEntity));
+
+        alarmEntityRepository.save(AlarmEntity.of(postEntity.getUser(),
+                NEW_LIKE_ON_POST,
+                new AlarmArgs(userEntity.getId(), postEntity.getId())));
     }
 
-    public int likeCount(Integer postId) {
+    public long likeCount(Integer postId) {
         PostEntity postEntity = getPostOrException(postId);
 
         return likeEntityRepository.countByPost(postEntity);
@@ -101,6 +104,10 @@ public class PostService {
         PostEntity postEntity = getPostOrException(postId);
 
         commentEntityRepository.save(CommentEntity.of(postEntity, userEntity, comment));
+
+        alarmEntityRepository.save(AlarmEntity.of(postEntity.getUser(),
+                NEW_COMMENT_ON_POST,
+                new AlarmArgs(userEntity.getId(), postEntity.getId())));
     }
 
     public Page<Comment> getComment(Integer postId, Pageable pageable) {
